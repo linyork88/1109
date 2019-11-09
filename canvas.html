@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Canvas</title>
+</head>
+<body>
+    <h3>Canvas</h3>
+    <input type="file" onchange="loadFile(this);"/>
+    <button onclick="grayscale();">Grayscale</button>
+    <button onclick="invert();">invert</button>
+    <button onclick="downloadFile();">Download</button>
+    <a id="download-link"></a>
+    <hr/>
+    <canvas id="cvs" width="800" height="600" style="border:1px solid black"></canvas> 
+        <script>
+            function downloadFile(){
+                //將canvas 的資料輸出:轉換成blob物件
+                cvs.toBlob(function(blob){
+                    // 將blob轉換成網址
+                    let src=URL.createObjectURL(blob);
+                    //操作 HTML download link
+                    let link=document.querySelector("#download-link");
+                    link.href=src;
+                    link.download="檔案名稱.jpg";
+                    link.click(); //模擬使用者點擊
+                });          
+            }
+            function loadFile(input){
+                let file=input.files[0];//取得使用者選取的檔案物件
+                let src=URL.createObjectURL(file);// 將檔案物件或blob物件轉換成內部網址
+                loadImage(src);
+            }
+            function loadImage(src){
+                let img=new Image(); //相當於<img src="圖檔位址"/> 標籤
+                img.src=src;
+                img.addEventListener("load",function(){
+                //調整canvas的尺寸和圖片一樣
+                cvs.width=img.width;
+                cvs.height=img.height;
+                //確認圖片載入完成後才畫上去
+                ctx.drawImage(img, 0,0, cvs.width, cvs.height);
+                });
+            }
+
+
+            //介面功能
+            function invert(){
+                let pixels=ctx.getImageData(0,0, cvs.width, cvs.height);
+                let  data=pixels.data;
+                //以像素為單位處理資料
+                let avg;
+                for (let i=0; i<data.length;i+=4){
+                    avg=(data[i]+data[i+1]+data[i+2])/3;
+                    data[i]=255-data[i];
+                    data[i+1]=255-data[i+1];
+                    data[i+2]=255-data[i+2];
+                }
+                ctx.putImageData(pixels,0,0);
+            }
+            function grayscale(){
+                let pixels=ctx.getImageData(0,0, cvs.width, cvs.height);
+                let  data=pixels.data;
+                //以像素為單位處理資料
+                let avg;
+                for (let i=0; i<data.length;i+=4){
+                    avg=(data[i]+data[i+1]+data[i+2])/3;
+                    data[i]=avg;
+                    data[i+1]=avg;
+                    data[i+2]=avg;
+                }
+                ctx.putImageData(pixels,0,0);
+            }
+            
+            let cvs=document.querySelector("#cvs"); //取得canvas 標籤
+            let ctx=cvs.getContext("2d"); //取得 canvas 對應的context 物件
+            //填滿
+            /*ctx.fillStyle="red";
+            ctx.fillRect(50,50,100,100); //利用context 物件來作畫:畫一個方形
+            ctx.fillStyle="black";
+            ctx.font="30px 微軟正黑體"; //和CSS的font屬性一樣
+            ctx.fillText("Hello", 500,100);
+            //描邊
+            ctx.strokeStyle="blue";
+            ctx.strokeRect(50, 300, 50, 50);
+            //繪製路徑:比較複雜的形狀(曲線)
+            //定義路徑>填滿或描邊
+            ctx.beginPath();
+            ctx.arc(300,300,20,0, 2*Math.PI);
+            ctx.fill(); //ctx.stroke();
+            */
+            //畫一張圖片到畫布上
+            
+        </script>
+</body>
+</html>
